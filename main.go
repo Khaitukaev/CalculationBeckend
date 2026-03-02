@@ -97,6 +97,39 @@ func postCalculation(c echo.Context) error {
 	return c.JSON(http.StatusCreated, calc)
 }
 
+func patchCalculation(c echo.Context) error {
+	id := c.Param("id")
+
+	var req CalculationRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	}
+
+	result, err := calculateExpression(req.Expression)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid expression"})
+	}
+
+	for i, calculation := range calculations {
+		if calculation.ID == id {
+			calculations[i].Expression = req.Expression
+			calculations[i].Result = result
+		}
+	}
+	return c.JSON(http.StatusOK, calculations)
+}
+
+func deleteCalculation(c echo.Context) error {
+	id := c.Param("id")
+
+	for i, calculation := range calculations {
+		if calculation.ID == id {
+			calculations = append(calculations[:i], calculations[i+1:]...)
+		}
+	}
+	return c.NoContent(http.StatusNoContent)
+}
+
 func main() {
 
 	e := echo.New()
@@ -106,6 +139,7 @@ func main() {
 
 	e.GET("/calculations", getCalculation)
 	e.POST("/calculations", postCalculation)
+	e.PATCH("/calculations/:id", patchCalculation)
 
 	e.POST("/task", postTaskHandler)
 	e.GET("/", getHelloHandler)

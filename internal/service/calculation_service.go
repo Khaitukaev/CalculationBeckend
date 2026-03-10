@@ -10,7 +10,7 @@ import (
 )
 
 type CalculationService interface {
-	CreateCalculation(expression string) (domain.Calculation, error)
+	CreateCalculation(expression string) (*domain.Calculation, error)
 	GetAllCalculations() ([]domain.Calculation, error)
 	GetCalculationByID(id string) (domain.Calculation, error)
 	UpdateCalculation(id, expression string) (domain.Calculation, error)
@@ -39,20 +39,20 @@ func (s *calcService) calculateExpression(expression string) (string, error) {
 }
 
 // CreateCalculation implements [CalculationService].
-func (s *calcService) CreateCalculation(expression string) (domain.Calculation, error) {
+func (s *calcService) CreateCalculation(expression string) (*domain.Calculation, error) {
 	result, err := s.calculateExpression(expression)
 	if err != nil {
-		return domain.Calculation{}, err
+		return &domain.Calculation{}, err
 	}
 
-	calc := domain.Calculation{
+	calc := &domain.Calculation{
 		ID:         uuid.NewString(),
 		Expression: expression,
 		Result:     result,
 	}
 
-	if err := s.repo.CreateCalculation(calc.Result); err != nil {
-		return domain.Calculation{}, err
+	if err := s.repo.CreateCalculation(calc); err != nil {
+		return &domain.Calculation{}, err
 	}
 
 	return calc, nil

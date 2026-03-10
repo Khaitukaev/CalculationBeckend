@@ -9,7 +9,7 @@ import (
 // Основные методы CRUD - Create, Read, Update, Delete
 
 type CalculationRepository interface {
-	CreateCalculation(calc string) error
+	CreateCalculation(calc *domain.Calculation) error
 	GetAllCalculations() ([]domain.Calculation, error)
 	GetCalculationByID(id string) (domain.Calculation, error)
 	UpdateCalculation(calc domain.Calculation) error
@@ -24,7 +24,7 @@ func NewCalculationRepository(db *gorm.DB) CalculationRepository {
 	return &calcRepository{db: db}
 }
 
-func (r *calcRepository) CreateCalculation(calc string) error {
+func (r *calcRepository) CreateCalculation(calc *domain.Calculation) error {
 	return r.db.Create(&calc).Error
 }
 
